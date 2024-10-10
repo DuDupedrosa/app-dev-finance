@@ -1,5 +1,5 @@
 import { customTheme } from "@/theme/theme";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
 
@@ -22,11 +22,13 @@ export default function AuthActionButtonAndLink({
       </TouchableOpacity>
 
       <View style={styles.loginLinkContainer}>
-        <Link href={isLogin ? "/auth/register" : "/auth"}>
-          <Text variant="labelSmall" style={styles.loginLink}>
-            {isLogin ? "Não tem conta?cadastro" : "Já tem conta?entrar"}
-          </Text>
-        </Link>
+        <Text
+          variant="labelSmall"
+          style={styles.loginLink}
+          onPress={() => router.push(isLogin ? "/auth/register" : "/auth")}
+        >
+          {isLogin ? "Não tem conta?cadastro" : "Já tem conta?entrar"}
+        </Text>
       </View>
     </View>
   );
@@ -42,11 +44,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   loginLink: {
-    backgroundColor: "blue",
     flexShrink: 1,
-    padding: 12,
+    padding: 8,
     color: customTheme.colors["primary-600"],
-    textAlign: "center",
     textDecorationColor: customTheme.colors["primary-600"],
     textDecorationLine: "underline",
   },
