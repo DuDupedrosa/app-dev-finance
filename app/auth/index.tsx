@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TextInput } from "react-native-paper";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AuthPageTitle from "@/ui/auth/AuthPageTitle";
 import AuthBackPageIcon from "@/ui/auth/AuthBackPageIcon";
 import AuthActionButtonAndLink from "@/ui/auth/AuthActionButtonAndLink";
@@ -10,6 +10,12 @@ import { Controller, useForm } from "react-hook-form";
 import InputErroMessage from "@/ui/components/InputErroMessage";
 import { AlertDefaultData } from "@/types/alert";
 import AlertComponent from "@/ui/components/AlertComponents";
+import Animated, {
+  Easing,
+  useSharedValue,
+  withTiming,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 
 type FormData = {
   email: string;
@@ -17,10 +23,24 @@ type FormData = {
 };
 
 export default function LoginPage() {
+  const translateX = useSharedValue(300);
   const [hiddenPassword, setHiddenPassword] = useState<boolean>(true);
   const [alert, setAlert] = useState<AlertDefaultData>({
     isVisible: false,
     text: "",
+  });
+
+  useEffect(() => {
+    translateX.value = withTiming(0, {
+      duration: 500,
+      easing: Easing.out(Easing.exp),
+    });
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
   });
 
   const {
@@ -37,7 +57,7 @@ export default function LoginPage() {
   return (
     <SafeAreaView>
       <ScrollView>
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, animatedStyle]}>
           <AuthBackPageIcon onBack={() => router.push("/")} />
 
           <AuthPageTitle title="Entrar" />
@@ -110,7 +130,7 @@ export default function LoginPage() {
               />
             </View>
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );

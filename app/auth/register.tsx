@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TextInput, useTheme } from "react-native-paper";
 import PasswordRolesList from "@/ui/components/PasswordRolesList";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AuthPageTitle from "@/ui/auth/AuthPageTitle";
 import AuthBackPageIcon from "@/ui/auth/AuthBackPageIcon";
 import AuthActionButtonAndLink from "@/ui/auth/AuthActionButtonAndLink";
@@ -13,6 +13,12 @@ import { validatePassword } from "@/helpers/validator/validatorPassword";
 import { regexpEmail } from "@/helpers/regexp/email";
 import AlertComponent from "@/ui/components/AlertComponents";
 import { AlertDefaultData } from "@/types/alert";
+import Animated, {
+  Easing,
+  useSharedValue,
+  withTiming,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 
 type FormData = {
   name: string;
@@ -21,6 +27,7 @@ type FormData = {
 };
 
 export default function RegisterPage() {
+  const translateX = useSharedValue(300);
   const { colors } = useTheme();
   const [hiddenPassword, setHiddenPassword] = useState<boolean>(true);
   const [validEmail, setValidEmail] = useState<boolean>(true);
@@ -59,10 +66,23 @@ export default function RegisterPage() {
     setValidPassword(result);
   }
 
+  useEffect(() => {
+    translateX.value = withTiming(0, {
+      duration: 500,
+      easing: Easing.out(Easing.exp),
+    });
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
+
   return (
     <SafeAreaView>
       <ScrollView>
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, animatedStyle]}>
           <AuthBackPageIcon onBack={() => router.push("/auth")} />
 
           <AuthPageTitle title="Cadastro" />
@@ -183,7 +203,7 @@ export default function RegisterPage() {
               onSubmit={() => onSubmit()}
             />
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
