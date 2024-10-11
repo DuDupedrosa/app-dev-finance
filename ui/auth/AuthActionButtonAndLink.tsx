@@ -5,8 +5,10 @@ import { Button, Text, useTheme } from "react-native-paper";
 
 export default function AuthActionButtonAndLink({
   isLogin,
+  onSubmit,
 }: {
   isLogin: boolean;
+  onSubmit: () => void;
 }) {
   const { colors } = useTheme();
 
@@ -14,6 +16,7 @@ export default function AuthActionButtonAndLink({
     <View>
       <TouchableOpacity style={styles.buttonSubmit}>
         <Button
+          onPress={() => onSubmit()}
           buttonColor={colors.primary}
           textColor={customTheme.colors.light}
         >
