@@ -22,5 +22,6 @@ export const customTheme = {
     black: dark,
     "red-600": "#DC2626",
     "primary-600": "#16A34A",
+    "primary-500": "#22c55e",
   },
 };

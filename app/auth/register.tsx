@@ -11,6 +11,8 @@ import { useForm, Controller } from "react-hook-form";
 import InputErroMessage from "@/ui/components/InputErroMessage";
 import { validatePassword } from "@/helpers/validator/validatorPassword";
 import { regexpEmail } from "@/helpers/regexp/email";
+import AlertComponent from "@/ui/components/AlertComponents";
+import { AlertDefaultData } from "@/types/alert";
 
 type FormData = {
   name: string;
@@ -25,6 +27,10 @@ export default function RegisterPage() {
   const [validPassword, setValidPassword] = useState<
     boolean | { enum: number; key: string }
   >(true);
+  const [alert, setAlert] = useState<AlertDefaultData>({
+    isVisible: false,
+    text: "",
+  });
 
   const {
     control,
@@ -163,6 +169,14 @@ export default function RegisterPage() {
             </View>
 
             <PasswordRolesList />
+
+            {alert.isVisible && (
+              <AlertComponent
+                type="erro"
+                text={alert.text}
+                onClose={() => setAlert({ isVisible: false, text: "" })}
+              />
+            )}
 
             <AuthActionButtonAndLink
               isLogin={false}
