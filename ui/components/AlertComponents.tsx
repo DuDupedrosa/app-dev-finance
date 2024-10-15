@@ -5,12 +5,15 @@ import Foundation from "@expo/vector-icons/Foundation";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Animated, { Easing, FadeInLeft } from "react-native-reanimated";
 
+export const defaultErroMessage = `Ops! Ocorreu um erro, tente novamente mais tarde.`;
 export default function AlertComponent({
   type,
   text,
   onClose,
+  outline,
 }: {
   type: "success" | "erro";
+  outline?: boolean;
   text: string;
   onClose?: () => void;
 }) {
@@ -30,7 +33,11 @@ export default function AlertComponent({
   function getAlertIconByType() {
     if (type === "erro") {
       return (
-        <Foundation name="alert" size={20} color={customTheme.colors.light} />
+        <Foundation
+          name="alert"
+          size={20}
+          color={outline ? getAlertStylesByType().bg : customTheme.colors.light}
+        />
       );
     }
 
@@ -38,7 +45,7 @@ export default function AlertComponent({
       <AntDesign
         name="checkcircleo"
         size={20}
-        color={customTheme.colors.light}
+        color={outline ? getAlertStylesByType().bg : customTheme.colors.light}
       />
     );
   }
@@ -48,12 +55,22 @@ export default function AlertComponent({
       entering={FadeInLeft.duration(300).easing(Easing.inOut(Easing.ease))}
       style={{
         ...styles.container,
-        backgroundColor: getAlertStylesByType().bg,
+        borderWidth: outline ? 1 : 0,
+        borderColor: outline ? getAlertStylesByType().bg : "transparent",
+        backgroundColor: outline ? "transparent" : getAlertStylesByType().bg,
       }}
     >
       <View style={styles.content}>
         {getAlertIconByType()}
-        <Text variant="labelMedium" style={styles.text}>
+        <Text
+          variant="labelMedium"
+          style={{
+            ...styles.text,
+            color: outline
+              ? getAlertStylesByType().bg
+              : customTheme.colors.light,
+          }}
+        >
           {text}
         </Text>
       </View>
@@ -63,7 +80,9 @@ export default function AlertComponent({
             <AntDesign
               name="closecircleo"
               size={20}
-              color={customTheme.colors.light}
+              color={
+                outline ? customTheme.colors.black : customTheme.colors.light
+              }
             />
           </TouchableOpacity>
         </View>
@@ -81,10 +100,10 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: "row",
     gap: 8,
+    paddingRight: 36,
     alignItems: "flex-start",
   },
   text: {
-    color: customTheme.colors.light,
     fontWeight: "500",
     paddingRight: 8,
   },

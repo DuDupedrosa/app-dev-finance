@@ -1,6 +1,6 @@
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, TextInput, useTheme } from "react-native-paper";
+import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import PasswordRolesList from "@/ui/components/PasswordRolesList";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -11,7 +11,9 @@ import { useForm, Controller } from "react-hook-form";
 import InputErroMessage from "@/ui/components/InputErroMessage";
 import { validatePassword } from "@/helpers/validator/validatorPassword";
 import { regexpEmail } from "@/helpers/regexp/email";
-import AlertComponent from "@/ui/components/AlertComponents";
+import AlertComponent, {
+  defaultErroMessage,
+} from "@/ui/components/AlertComponents";
 import { AlertDefaultData } from "@/types/alert";
 import Animated, {
   Easing,
@@ -19,6 +21,9 @@ import Animated, {
   withTiming,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import { http } from "@/api/http";
+import axios, { HttpStatusCode } from "axios";
+import { customTheme } from "@/theme/theme";
 
 type FormData = {
   name: string;
@@ -38,19 +43,45 @@ export default function RegisterPage() {
     isVisible: false,
     text: "",
   });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [successRegister, setSuccessRegister] = useState<boolean>(false);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
     getValues,
+    setValue,
   } = useForm<FormData>();
 
-  const onSubmit = handleSubmit((data) => {
-    if (!validEmail) return;
-    if (typeof validPassword === "object") return;
+  function resetForm() {
+    setValue("email", "");
+    setValue("name", "");
+    setValue("password", "");
+  }
 
-    console.warn(data);
+  const onSubmit = handleSubmit(async (userData) => {
+    if (loading) return;
+
+    setLoading(true);
+    setSuccessRegister(false);
+
+    try {
+      if (!validEmail) return;
+      if (typeof validPassword === "object") return;
+      let payload = { ...userData };
+
+      await http.post(`user/register`, payload);
+      resetForm();
+      setSuccessRegister(true);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status) {
+          setAlert({ isVisible: true, text: defaultErroMessage });
+        }
+      }
+    }
+    setLoading(false);
   });
 
   function isValidEmail() {
@@ -198,11 +229,33 @@ export default function RegisterPage() {
               />
             )}
 
-            <AuthActionButtonAndLink
-              isLogin={false}
-              onSubmit={() => onSubmit()}
-            />
+            {!successRegister && (
+              <AuthActionButtonAndLink
+                loading={loading}
+                isLogin={false}
+                onSubmit={() => onSubmit()}
+              />
+            )}
           </View>
+
+          {successRegister && (
+            <View style={{ gap: 20, marginVertical: 20 }}>
+              <AlertComponent
+                outline={true}
+                type="success"
+                text={
+                  "Cadastro realizado com sucesso! Agora, clique no botão abaixo para fazer login com suas credenciais."
+                }
+              />
+              <Button
+                onPress={() => router.push("/auth")}
+                buttonColor={colors.primary}
+                textColor={customTheme.colors.light}
+              >
+                Entrar na plataforma
+              </Button>
+            </View>
+          )}
         </Animated.View>
       </ScrollView>
     </SafeAreaView>
