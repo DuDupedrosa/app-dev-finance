@@ -24,6 +24,7 @@ import Animated, {
 import { http } from "@/api/http";
 import axios, { HttpStatusCode } from "axios";
 import { customTheme } from "@/theme/theme";
+import httpErroKeysMessage from "@/helpers/data/httpErroKeysMessage";
 
 type FormData = {
   name: string;
@@ -77,7 +78,10 @@ export default function RegisterPage() {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status) {
-          setAlert({ isVisible: true, text: defaultErroMessage });
+          setAlert({
+            isVisible: true,
+            text: httpErroKeysMessage.internal_server_erro,
+          });
         }
       }
     }

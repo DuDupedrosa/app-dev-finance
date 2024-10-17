@@ -16,6 +16,9 @@ import Animated, {
   withTiming,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import { http } from "@/api/http";
+import axios, { HttpStatusCode } from "axios";
+import httpErroKeysMessage from "@/helpers/data/httpErroKeysMessage";
 
 type FormData = {
   email: string;
@@ -29,6 +32,7 @@ export default function LoginPage() {
     isVisible: false,
     text: "",
   });
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     translateX.value = withTiming(0, {
@@ -50,8 +54,42 @@ export default function LoginPage() {
     getValues,
   } = useForm<FormData>();
 
-  const onSubmit = handleSubmit((data) => {
-    console.warn(data);
+  const onSubmit = handleSubmit(async (userData) => {
+    setLoading(true);
+    setAlert({ isVisible: false, text: "" });
+    try {
+      let payload = userData;
+      const { data } = await http.post(`user/signin`, payload);
+      const { token, user } = data.content;
+
+      router.push({
+        pathname: "/",
+        params: { user: JSON.stringify(user), token },
+      });
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const errResp = err.response;
+
+        if (errResp) {
+          if (errResp.status !== HttpStatusCode.InternalServerError) {
+            const errorKey = errResp.data
+              .message as keyof typeof httpErroKeysMessage;
+            const httpKey = httpErroKeysMessage[errorKey];
+
+            setAlert({
+              isVisible: true,
+              text: httpKey ? httpErroKeysMessage[errorKey] : errorKey,
+            });
+          } else {
+            setAlert({
+              isVisible: true,
+              text: httpErroKeysMessage.internal_server_erro,
+            });
+          }
+        }
+      }
+    }
+    setLoading(false);
   });
 
   return (
@@ -117,14 +155,17 @@ export default function LoginPage() {
               {errors.password && <InputErroMessage />}
 
               {alert.isVisible && (
-                <AlertComponent
-                  type="erro"
-                  text={alert.text}
-                  onClose={() => setAlert({ isVisible: false, text: "" })}
-                />
+                <View style={{ marginTop: 20 }}>
+                  <AlertComponent
+                    type="erro"
+                    text={alert.text}
+                    onClose={() => setAlert({ isVisible: false, text: "" })}
+                  />
+                </View>
               )}
 
               <AuthActionButtonAndLink
+                loading={loading}
                 isLogin={true}
                 onSubmit={() => onSubmit()}
               />
