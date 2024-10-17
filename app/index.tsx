@@ -27,6 +27,8 @@ export default function homePage() {
         )}
         <Text>{token}</Text>
 
+        <Link href={"/(tabs)"}>Tabs</Link>
+
         <Link href={"/auth"}>vamos para o login</Link>
         <Button mode="contained" buttonColor="#1f2" icon={"camera"}>
           {" "}

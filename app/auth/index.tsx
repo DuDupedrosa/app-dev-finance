@@ -63,7 +63,7 @@ export default function LoginPage() {
       const { token, user } = data.content;
 
       router.push({
-        pathname: "/",
+        pathname: "/(tabs)/profile",
         params: { user: JSON.stringify(user), token },
       });
     } catch (err) {
