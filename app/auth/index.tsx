@@ -19,6 +19,8 @@ import Animated, {
 import { http } from "@/api/http";
 import axios, { HttpStatusCode } from "axios";
 import httpErroKeysMessage from "@/helpers/data/httpErroKeysMessage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { storeUserData } from "@/helpers/methods/asyncStorage";
 
 type FormData = {
   email: string;
@@ -64,8 +66,11 @@ export default function LoginPage() {
 
       router.push({
         pathname: "/(tabs)/profile",
-        params: { user: JSON.stringify(user), token },
       });
+      await AsyncStorage.multiSet([
+        ["token", token],
+        ["username", user.name],
+      ]);
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const errResp = err.response;

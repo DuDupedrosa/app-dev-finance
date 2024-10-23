@@ -17,6 +17,7 @@ import BasicFormData from "@/ui/tabs/profile/BasicFormData";
 import FormChangePassword from "@/ui/tabs/profile/FormChangePassword";
 import { ActivityIndicator, MD2Colors } from "react-native-paper";
 import PageSpinner from "@/ui/components/PageSpinner";
+import { getUserData } from "@/helpers/methods/asyncStorage";
 
 const StepsEnum = {
   USER_DATA: 1,
@@ -25,16 +26,27 @@ const StepsEnum = {
 
 export default function ProfileScreen() {
   const translateX = useSharedValue(300);
-  const { user, token } = useLocalSearchParams<DefaultRouterParams>();
   const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [step, setStep] = useState<number>(StepsEnum.USER_DATA);
+  const [token, setToken] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
 
   useEffect(() => {
     translateX.value = withTiming(0, {
       duration: 500,
       easing: Easing.out(Easing.exp),
     });
+
+    const loadUserData = async () => {
+      const user = await getUserData();
+
+      if (user) {
+        if (user.token) setToken(user.token);
+        if (user.username) setUsername(user.username);
+      }
+    };
+    loadUserData();
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -56,26 +68,31 @@ export default function ProfileScreen() {
       setLoading(false);
     }
 
-    getUserData();
+    if (token) {
+      getUserData();
+    }
   }, [token]);
 
   return (
     <SafeAreaView
       style={{ backgroundColor: customTheme.colors.light, flex: 1 }}
     >
-      {userData && !loading && (
-        <ScrollView>
-          <Animated.View style={[styles.container, animatedStyle]}>
+      <ScrollView>
+        <Animated.View style={[styles.container, animatedStyle]}>
+          {(username || (userData && !loading)) && (
+            <>
+              <Text variant="headlineLarge" style={styles.title}>
+                Olá, {username ?? userData?.name}
+              </Text>
+              <Text variant="labelLarge" style={styles.subtitle}>
+                Edite os detalhes da sua conta para garantir que tudo esteja
+                correto e atualizado.
+              </Text>
+            </>
+          )}
+          {userData && !loading && (
             <View>
               <View>
-                <Text variant="headlineLarge" style={styles.title}>
-                  Olá, {userData.name}
-                </Text>
-                <Text variant="labelLarge" style={styles.subtitle}>
-                  Edite os detalhes da sua conta para garantir que tudo esteja
-                  correto e atualizado.
-                </Text>
-
                 <View style={styles.tabsButtonContainer}>
                   <TouchableOpacity
                     style={{ flex: 1 }}
@@ -120,15 +137,22 @@ export default function ProfileScreen() {
               </View>
 
               {step === StepsEnum.USER_DATA && (
-                <BasicFormData token={token} userData={userData} />
+                <BasicFormData
+                  token={token}
+                  userData={userData}
+                  onSuccess={(editedUser) => {
+                    let edited = { ...userData, ...editedUser };
+                    setUserData(edited);
+                  }}
+                />
               )}
               {step === StepsEnum.USER_CHANGE_PASSWORD && (
                 <FormChangePassword token={token} />
               )}
             </View>
-          </Animated.View>
-        </ScrollView>
-      )}
+          )}
+        </Animated.View>
+      </ScrollView>
       {loading && <PageSpinner />}
     </SafeAreaView>
   );

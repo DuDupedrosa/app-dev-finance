@@ -1,6 +1,6 @@
 import { customTheme } from "@/theme/theme";
 import { StyleSheet, View } from "react-native";
-import { ActivityIndicator } from "react-native-paper";
+import { ActivityIndicator, Text } from "react-native-paper";
 
 export default function PageSpinner() {
   return (
@@ -10,6 +10,9 @@ export default function PageSpinner() {
         size={"large"}
         color={customTheme.colors["primary-600"]}
       />
+      <Text style={styles.label} variant="labelMedium">
+        Buscando informações
+      </Text>
     </View>
   );
 }
@@ -17,6 +20,9 @@ export default function PageSpinner() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+  },
+  label: {
+    textAlign: "center",
+    marginTop: 8,
   },
 });

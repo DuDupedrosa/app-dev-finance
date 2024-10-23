@@ -29,9 +29,11 @@ type FormData = {
 export default function BasicFormData({
   token,
   userData,
+  onSuccess,
 }: {
   token: string;
   userData: User | null;
+  onSuccess: (editedUser: Partial<User>) => void;
 }) {
   const [updatedLoading, setUpdatedLoading] = useState<boolean>(false);
   const [alert, setAlert] = useState<AlertDefaultData>({
@@ -55,6 +57,8 @@ export default function BasicFormData({
     setValue("lastName", lastName ?? "");
     setValue("email", email);
     setValue("cellphone", cellphone ?? "");
+
+    onSuccess(data);
   }
 
   const onSubmit = handleSubmit(async (userDataToUpdate) => {
