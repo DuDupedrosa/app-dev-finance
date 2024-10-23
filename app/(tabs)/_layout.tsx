@@ -4,6 +4,7 @@ import React from "react";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { customTheme } from "@/theme/theme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -13,6 +14,13 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
+        tabBarStyle: {
+          backgroundColor: customTheme.colors["gray-900"],
+          height: 70,
+          paddingBottom: 10,
+          borderTopWidth: 1,
+          borderColor: customTheme.colors["gray-900"],
+        },
       }}
     >
       <Tabs.Screen
@@ -42,12 +50,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: "Perfil",
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon
-              name={focused ? "code-slash" : "code-slash-outline"}
-              color={color}
-            />
+            <TabBarIcon name={"person"} color={color} />
           ),
         }}
       />
