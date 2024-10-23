@@ -29,6 +29,8 @@ export default function homePage() {
 
         <Link href={"/(tabs)"}>Tabs</Link>
 
+        <Link href={"/(tabs)/addSpent"}>Dispesa</Link>
+
         <Link href={"/auth"}>vamos para o login</Link>
         <Button mode="contained" buttonColor="#1f2" icon={"camera"}>
           {" "}

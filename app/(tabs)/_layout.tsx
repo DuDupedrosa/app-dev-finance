@@ -56,6 +56,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="addSpent"
+        options={{
+          title: "Adicionar",
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={"add-circle"} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

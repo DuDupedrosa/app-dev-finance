@@ -81,10 +81,10 @@ export default function ProfileScreen() {
         <Animated.View style={[styles.container, animatedStyle]}>
           {(username || (userData && !loading)) && (
             <>
-              <Text variant="headlineLarge" style={styles.title}>
+              <Text variant="headlineMedium" style={styles.title}>
                 Olá, {username ?? userData?.name}
               </Text>
-              <Text variant="labelLarge" style={styles.subtitle}>
+              <Text variant="labelMedium" style={styles.subtitle}>
                 Edite os detalhes da sua conta para garantir que tudo esteja
                 correto e atualizado.
               </Text>
