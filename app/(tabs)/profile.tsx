@@ -15,6 +15,8 @@ import { http } from "@/api/http";
 import { User } from "@/types/user";
 import BasicFormData from "@/ui/tabs/profile/BasicFormData";
 import FormChangePassword from "@/ui/tabs/profile/FormChangePassword";
+import { ActivityIndicator, MD2Colors } from "react-native-paper";
+import PageSpinner from "@/ui/components/PageSpinner";
 
 const StepsEnum = {
   USER_DATA: 1,
@@ -61,9 +63,9 @@ export default function ProfileScreen() {
     <SafeAreaView
       style={{ backgroundColor: customTheme.colors.light, flex: 1 }}
     >
-      <ScrollView>
-        <Animated.View style={[styles.container, animatedStyle]}>
-          {userData && !loading && (
+      {userData && !loading && (
+        <ScrollView>
+          <Animated.View style={[styles.container, animatedStyle]}>
             <View>
               <View>
                 <Text variant="headlineLarge" style={styles.title}>
@@ -88,7 +90,7 @@ export default function ProfileScreen() {
                       textColor={
                         step === StepsEnum.USER_DATA
                           ? customTheme.colors.light
-                          : customTheme.colors["blue-600"]
+                          : customTheme.colors["gray-600"]
                       }
                     >
                       Básico
@@ -108,7 +110,7 @@ export default function ProfileScreen() {
                       textColor={
                         step === StepsEnum.USER_CHANGE_PASSWORD
                           ? customTheme.colors.light
-                          : customTheme.colors["blue-600"]
+                          : customTheme.colors["gray-600"]
                       }
                     >
                       Alterar senha
@@ -124,9 +126,10 @@ export default function ProfileScreen() {
                 <FormChangePassword token={token} />
               )}
             </View>
-          )}
-        </Animated.View>
-      </ScrollView>
+          </Animated.View>
+        </ScrollView>
+      )}
+      {loading && <PageSpinner />}
     </SafeAreaView>
   );
 }
@@ -134,6 +137,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    flex: 1,
   },
   title: {
     color: customTheme.colors.black,
@@ -147,18 +151,19 @@ const styles = StyleSheet.create({
   tabsButtonContainer: {
     flexDirection: "row",
     gap: 20,
-    marginVertical: 32,
+    marginTop: 64,
+    marginBottom: 32,
   },
   tabsButton: {
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: customTheme.colors["blue-600"],
+    borderColor: customTheme.colors["gray-600"],
     flex: 1,
   },
   tabsButtonActive: {
-    backgroundColor: customTheme.colors["blue-600"],
+    backgroundColor: customTheme.colors["gray-600"],
     borderWidth: 1,
-    borderColor: customTheme.colors["blue-600"],
+    borderColor: customTheme.colors["gray-600"],
     flex: 1,
   },
 });
