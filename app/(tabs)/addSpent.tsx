@@ -6,37 +6,51 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Text, TextInput, useTheme } from "react-native-paper";
+import { ActivityIndicator, Button, Text, TextInput } from "react-native-paper";
 import { useEffect, useState } from "react";
-import Animated, {
-  Easing,
-  useSharedValue,
-  withTiming,
-  useAnimatedStyle,
-} from "react-native-reanimated";
+import { Easing, useSharedValue, withTiming } from "react-native-reanimated";
 import { customTheme } from "@/theme/theme";
 import { Dropdown } from "react-native-paper-dropdown";
 import { getUserData } from "@/helpers/methods/asyncStorage";
-import { Controller, useForm } from "react-hook-form";
 import InputErroMessage from "@/ui/components/InputErroMessage";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { format, sub } from "date-fns";
+import { format } from "date-fns";
 import CurrencyInput from "react-native-currency-input";
-
-const OPTIONS = [
-  { label: "Male", value: "male" },
-  { label: "Female", value: "female" },
-  { label: "Other", value: "other" },
-];
+import { http } from "@/api/http";
+import { AlertDefaultData, AlertDefaultType } from "@/types/alert";
+import AlertComponent from "@/ui/components/AlertComponents";
 
 export default function AddSpent() {
   const translateX = useSharedValue(300);
   const [loading, setLoading] = useState<boolean>(false);
   const [token, setToken] = useState<string>("");
   const [username, setUsername] = useState<string>("");
-  const [gender, setGender] = useState<string>();
+  const [alert, setAlert] = useState<AlertDefaultData>({
+    isVisible: false,
+    text: "",
+  });
+  const [alertType, setAlertType] = useState<AlertDefaultType>("success");
+
+  // cenários de required
+  const [requiredCategory, setRequiredCategory] = useState<boolean>(false);
+  const [requiredDate, setRequiredDate] = useState<boolean>(false);
+  const [requiredHours, setRequiredHours] = useState<boolean>(false);
+  const [requiredValue, setRequiredValue] = useState<boolean>(false);
+  //end
+
+  //categorias
+  // categorias filtradas para o select
+  const [categories, setCategories] = useState<
+    { label: string; value: string }[]
+  >([]);
+  // mantém oq vem do back
+  const [categoriesData, setCategoriesData] = useState<
+    { name: string; id: number }[]
+  >([]);
+  const [category, setCategory] = useState<string>();
+  const [categoryLoading, setCategoryLoading] = useState<boolean>(false);
 
   // data
   const [date, setDate] = useState<Date | null>(null);
@@ -47,7 +61,7 @@ export default function AddSpent() {
   const [showHours, setShowHours] = useState<boolean>(false);
 
   //valor
-  const [spentValue, setSpentValue] = useState<number | null>(0);
+  const [expenseValue, setExpenseValue] = useState<number | null>(0);
 
   // manipulando a data
   const onChangeDate = (
@@ -79,15 +93,87 @@ export default function AddSpent() {
   };
   // end
 
-  function submit() {
-    let data = {
-      gender,
-      hours,
-      date,
-      spentValue,
-    };
+  function resetForm() {
+    setHours(null);
+    setDate(null);
+    setExpenseValue(null);
+    setCategory(undefined);
+  }
 
-    console.warn(data);
+  function validateInputsOnSubmit(): boolean {
+    let validate = true;
+
+    if (!category || category.length <= 0) {
+      setRequiredCategory(true);
+      validate = false;
+    }
+
+    if (!date) {
+      setRequiredDate(true);
+      validate = false;
+    }
+
+    if (!hours) {
+      setRequiredHours(true);
+      validate = false;
+    }
+
+    if (!expenseValue || expenseValue <= 0) {
+      setRequiredValue(true);
+      validate = false;
+    }
+
+    return validate;
+  }
+
+  async function submit() {
+    try {
+      // reset states on submit
+      setAlert({ isVisible: false, text: "" });
+      setLoading(true);
+      setRequiredCategory(false);
+      setRequiredDate(false);
+      setRequiredHours(false);
+      setRequiredValue(false);
+      // end
+
+      if (!validateInputsOnSubmit()) {
+        setLoading(false);
+        return;
+      }
+
+      let payload: {
+        categoryId: number | undefined;
+        time: string;
+        date: string;
+        expenseValue: number;
+      } = {
+        categoryId: categoriesData.find(
+          (categoryItem) => categoryItem.name === category
+        )?.id,
+        time: hours ? format(hours, "HH:mm") : "",
+        date: date ? format(date, "yyyy-MM-dd") : "",
+        expenseValue: Number(expenseValue),
+      };
+      await http.post("expense", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      resetForm();
+      setAlertType("success");
+      setAlert({
+        isVisible: true,
+        text: "Novo gasto registrado com sucesso! Você pode acessar a dashboard ou meus gastos para conferir os detalhes da transação.",
+      });
+      setLoading(false);
+    } catch (err) {
+      setAlertType("erro");
+      setAlert({
+        isVisible: true,
+        text: "Um erro aconteceu, tente novamente mais tarde",
+      });
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -107,21 +193,67 @@ export default function AddSpent() {
     loadUserData();
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: translateX.value }],
+  useEffect(() => {
+    const getCategories = async () => {
+      setCategoryLoading(true);
+      try {
+        const { data } = await http.get("expense/categories", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCategoriesData(data.content);
+        const filteredCategories = data.content.map(
+          (category: { name: string; id: number }) => {
+            return {
+              label: category.name,
+              value: String(category.name),
+            };
+          }
+        );
+
+        setCategories(filteredCategories);
+      } catch (err) {}
+      setCategoryLoading(false);
     };
-  });
+
+    if (token && token.length && categories.length <= 0) {
+      getCategories();
+    }
+  }, [token]);
 
   const CustomInput = (props: any) => (
     <TextInput
       {...props}
       mode="outlined"
       style={styles.input} // Você pode estilizar o input aqui
-      value={gender}
+      value={category}
     />
   );
 
+  // controlando o estado de required na mudança do estado
+  useEffect(() => {
+    if (category && category.length) {
+      setRequiredCategory(false);
+    }
+  }, [category]);
+
+  useEffect(() => {
+    if (hours) {
+      setRequiredHours(false);
+    }
+  }, [hours]);
+
+  useEffect(() => {
+    if (date) {
+      setRequiredDate(false);
+    }
+  }, [date]);
+
+  useEffect(() => {
+    if (expenseValue && expenseValue > 0) {
+      setRequiredValue(false);
+    }
+  }, [expenseValue]);
+  //end
   return (
     <SafeAreaView
       style={{ backgroundColor: customTheme.colors.light, flex: 1 }}
@@ -133,7 +265,7 @@ export default function AddSpent() {
               Adicionar novo gasto
             </Text>
             <Text variant="labelMedium" style={styles.subtitle}>
-              Preencha os campos abaixo, para salvar uma nova transação.
+              Preencha os campos abaixo para salvar um novo gasto.
             </Text>
           </View>
 
@@ -144,15 +276,28 @@ export default function AddSpent() {
               <Text variant="labelLarge" style={styles.label}>
                 Categoria
               </Text>
+              {categoryLoading && (
+                <ActivityIndicator
+                  size={"small"}
+                  style={{
+                    alignItems: "flex-start",
+                  }}
+                  animating={true}
+                  color={customTheme.colors["primary-600"]}
+                />
+              )}
 
-              <Dropdown
-                placeholder="Selecione uma categoria"
-                options={OPTIONS}
-                value={gender}
-                onSelect={setGender}
-                menuContentStyle={{ backgroundColor: "#fff" }}
-                CustomDropdownInput={CustomInput} // Passando o input personalizado
-              />
+              {categories.length > 0 && !categoryLoading && (
+                <Dropdown
+                  placeholder="Selecione uma categoria"
+                  options={categories}
+                  value={category}
+                  onSelect={setCategory}
+                  menuContentStyle={{ backgroundColor: "#fff" }}
+                  CustomDropdownInput={CustomInput} // Passando o input personalizado
+                />
+              )}
+              {requiredCategory && <InputErroMessage />}
             </View>
 
             {/* data */}
@@ -177,6 +322,7 @@ export default function AddSpent() {
                   onChange={onChangeDate} // Função chamada quando a data/hora muda
                 />
               )}
+              {requiredDate && <InputErroMessage />}
             </View>
 
             {/* hora */}
@@ -201,14 +347,15 @@ export default function AddSpent() {
                   onChange={onChangeHours}
                 />
               )}
+              {requiredHours && <InputErroMessage />}
             </View>
             <View>
               <Text variant="labelLarge" style={styles.label}>
                 Valor
               </Text>
               <CurrencyInput
-                value={spentValue}
-                onChangeValue={setSpentValue}
+                value={expenseValue}
+                onChangeValue={setExpenseValue}
                 prefix="R$ "
                 delimiter="."
                 separator=","
@@ -236,15 +383,27 @@ export default function AddSpent() {
                   );
                 }}
               />
+              {requiredValue && <InputErroMessage />}
             </View>
+
+            {alert.isVisible && (
+              <View style={{ marginTop: 20 }}>
+                <AlertComponent
+                  type={alertType}
+                  text={alert.text}
+                  onClose={() => setAlert({ isVisible: false, text: "" })}
+                />
+              </View>
+            )}
 
             <TouchableOpacity>
               <Button
                 onPress={() => submit()}
                 buttonColor={customTheme.colors["primary-600"]}
                 textColor={customTheme.colors.light}
+                loading={loading}
               >
-                Editar
+                Adicionar
               </Button>
             </TouchableOpacity>
           </View>
