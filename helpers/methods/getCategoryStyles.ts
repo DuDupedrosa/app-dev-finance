@@ -32,6 +32,11 @@ export default function getCategoryStyles(categoryId: number) {
       iconColor: "#ffffff",
       boxColor: "#16a34a",
     },
+    [CategoryTypeEnum.RECREATION]: {
+      label: "Lazer",
+      iconColor: "#ffffff",
+      boxColor: "##c026d3",
+    },
     [CategoryTypeEnum.CLOTHES]: {
       label: "Vestuário",
       iconColor: "#ffffff",

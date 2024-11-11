@@ -1,23 +1,41 @@
 import { customTheme } from "@/theme/theme";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { monthsListToDropdown } from "@/helpers/data/monthList";
+import {
+  monthListEnumAndValue,
+  monthsListToDropdown,
+} from "@/helpers/data/monthList";
 import { getUserData } from "@/helpers/methods/asyncStorage";
 import { http } from "@/api/http";
 import { ExpenseDataType } from "@/types/expense";
 import getCategoryStyles from "@/helpers/methods/getCategoryStyles";
 import { formatDateHelper } from "@/helpers/methods/formatDate";
 import { formatCurrencyBRL } from "@/helpers/methods/formatCurrency";
+import GetExpenseIcon from "../components/GetExpenseIcon";
+import { getMonth } from "date-fns";
+import { useNavigation, router } from "expo-router";
 
 export default function ExpensesComponent() {
   const [month, setMonth] = useState<string>();
   const [token, setToken] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [expenses, setExpenses] = useState<ExpenseDataType[]>([]);
+  const [firstGetExpense, setFirstGetExpense] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [currentMonth, setCurrentMonth] = useState<number>(
+    getMonth(new Date())
+  );
+  const { navigate } = useNavigation();
 
   const CustomInput = (props: any) => (
     <TextInput
@@ -28,14 +46,31 @@ export default function ExpensesComponent() {
     />
   );
 
-  async function getExpenses() {
+  async function getExpenses({ month }: { month: number | null }) {
+    setLoading(true);
     try {
-      const { data } = await http.get("expense/list-all", {
+      const originUrl = "expense/list-all";
+      let filterUrl = originUrl;
+
+      if (month !== null && month >= 0) {
+        filterUrl = `${originUrl}?month=${month}`;
+      } else {
+        filterUrl = originUrl;
+      }
+
+      const { data } = await http.get(filterUrl, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setExpenses(data.content);
     } catch (err) {}
+    setLoading(false);
+  }
+
+  function setMonthToCurrent() {
+    const findMonth = monthListEnumAndValue.find(
+      (monthObject) => monthObject.enum === currentMonth
+    );
+    setMonth(findMonth?.label);
   }
 
   useEffect(() => {
@@ -48,13 +83,30 @@ export default function ExpensesComponent() {
       }
     };
     loadUserData();
+    setCurrentMonth(getMonth(new Date()));
   }, []);
 
   useEffect(() => {
     if (token && token.length) {
-      getExpenses();
+      setMonthToCurrent();
+      getExpenses({ month: currentMonth });
     }
   }, [token]);
+
+  useEffect(() => {
+    if (!token || token.length <= 0) return;
+
+    const findMonthToFilter = monthListEnumAndValue.find(
+      (monthObject) => monthObject.label === month
+    );
+    // se já tiver feito o primeiro get no create do componente
+    if (findMonthToFilter) {
+      getExpenses({ month: findMonthToFilter.enum });
+    } else {
+      getExpenses({ month: currentMonth });
+      setMonthToCurrent();
+    }
+  }, [month]);
 
   return (
     <ScrollView>
@@ -76,72 +128,82 @@ export default function ExpensesComponent() {
 
         <View style={styles.headerList}>
           <Text variant="headlineSmall">Transações</Text>
-          <Button
-            textColor={customTheme.colors.light}
-            buttonColor={customTheme.colors["primary-600"]}
-          >
-            Nova transação
-          </Button>
+          <TouchableOpacity>
+            <Button
+              onPress={() => router.push("/(tabs)/addSpent")}
+              textColor={customTheme.colors.light}
+              buttonColor={customTheme.colors["primary-600"]}
+            >
+              Nova transação
+            </Button>
+          </TouchableOpacity>
         </View>
 
         {/* lista */}
-        <View style={styles.listContainer}>
-          {/* item */}
-          {expenses &&
-            expenses.length > 0 &&
-            expenses.map((expense, i) => {
-              return (
-                <View style={styles.listItem} key={i}>
-                  {/* imagem + nome */}
-                  <View style={styles.listItemFirstColumn}>
-                    <View
-                      style={{
-                        ...styles.listIcon,
-                        backgroundColor: getCategoryStyles(expense.categoryId)
-                          .boxColor,
-                      }}
-                    >
-                      <Ionicons
-                        name="fast-food-sharp"
-                        size={20}
-                        color={getCategoryStyles(expense.categoryId).iconColor}
-                      />
-                    </View>
-                    <Text variant="labelMedium" style={styles.categoryTitle}>
-                      {getCategoryStyles(expense.categoryId).label}
-                    </Text>
-                  </View>
-
-                  {/* valor + data */}
-                  <View style={styles.listItemSecondColumn}>
-                    <View style={styles.listItemValueAndDateContainer}>
-                      <Text
-                        variant="labelMedium"
-                        style={styles.listItemExpenseValue}
+        {!loading && (
+          <View style={styles.listContainer}>
+            {/* item */}
+            {expenses &&
+              expenses.length > 0 &&
+              expenses.map((expense, i) => {
+                return (
+                  <View style={styles.listItem} key={i}>
+                    {/* imagem + nome */}
+                    <View style={styles.listItemFirstColumn}>
+                      <View
+                        style={{
+                          ...styles.listIcon,
+                          backgroundColor: getCategoryStyles(expense.categoryId)
+                            .boxColor,
+                        }}
                       >
-                        {formatCurrencyBRL(expense.value)}
-                      </Text>
-                      <Text
-                        variant="labelSmall"
-                        style={styles.listItemExpenseDate}
-                      >
-                        {formatDateHelper(expense.date, "dd MMM yyyy, HH:mm")}
-                      </Text>
-                    </View>
-                    <TouchableOpacity>
-                      <View style={styles.listItemDeleteButton}>
-                        <AntDesign
-                          name="delete"
-                          size={20}
-                          color={customTheme.colors["red-600"]}
-                        />
+                        {<GetExpenseIcon expenseEnum={expense.categoryId} />}
                       </View>
-                    </TouchableOpacity>
+                      <Text variant="labelMedium" style={styles.categoryTitle}>
+                        {getCategoryStyles(expense.categoryId).label}
+                      </Text>
+                    </View>
+
+                    {/* valor + data */}
+                    <View style={styles.listItemSecondColumn}>
+                      <View style={styles.listItemValueAndDateContainer}>
+                        <Text
+                          variant="labelMedium"
+                          style={styles.listItemExpenseValue}
+                        >
+                          {formatCurrencyBRL(expense.value)}
+                        </Text>
+                        <Text
+                          variant="labelSmall"
+                          style={styles.listItemExpenseDate}
+                        >
+                          {formatDateHelper(expense.date, "dd MMM yyyy, HH:mm")}
+                        </Text>
+                      </View>
+                      <TouchableOpacity>
+                        <View style={styles.listItemDeleteButton}>
+                          <AntDesign
+                            name="delete"
+                            size={20}
+                            color={customTheme.colors["red-600"]}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                </View>
-              );
-            })}
-        </View>
+                );
+              })}
+          </View>
+        )}
+        {loading && (
+          <View style={{ marginTop: 64 }}>
+            <ActivityIndicator
+              size={"large"}
+              animating={true}
+              color={customTheme.colors["primary-600"]}
+            />
+          </View>
+        )}
       </View>
     </ScrollView>
   );

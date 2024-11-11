@@ -1,50 +1,117 @@
+import { MonthOptionsToFilterEnum } from "../enums/monthEnum";
+
+const monthsToLabel = {
+  january: "Janeiro",
+  february: "Fevereiro",
+  march: "Março",
+  april: "Abril",
+  may: "Maio",
+  june: "Junho",
+  july: "Julho",
+  august: "Agosto",
+  september: "Setembro",
+  october: "Outubro",
+  november: "Novembro",
+  dezember: "Dezembro",
+};
 export const monthsListToDropdown = [
   {
-    label: "Janeiro",
-    value: "Janeiro",
+    label: monthsToLabel.january,
+    value: monthsToLabel.january,
   },
   {
-    label: "Fevereiro",
-    value: "Fevereiro",
+    label: monthsToLabel.february,
+    value: monthsToLabel.february,
   },
   {
-    label: "Março",
-    value: "Março",
+    label: monthsToLabel.march,
+    value: monthsToLabel.march,
   },
   {
-    label: "Abril",
-    value: "Abril",
+    label: monthsToLabel.april,
+    value: monthsToLabel.april,
   },
   {
-    label: "Maio",
-    value: "Maio",
+    label: monthsToLabel.may,
+    value: monthsToLabel.may,
   },
   {
-    label: "Junho",
-    value: "Junho",
+    label: monthsToLabel.june,
+    value: monthsToLabel.june,
   },
   {
-    label: "Julho",
-    value: "Julho",
+    label: monthsToLabel.july,
+    value: monthsToLabel.july,
   },
   {
-    label: "Agosto",
-    value: "Agosto",
+    label: monthsToLabel.august,
+    value: monthsToLabel.august,
   },
   {
-    label: "Setembro",
-    value: "Setembro",
+    label: monthsToLabel.september,
+    value: monthsToLabel.september,
   },
   {
-    label: "Outubro",
-    value: "Outubro",
+    label: monthsToLabel.october,
+    value: monthsToLabel.october,
   },
   {
-    label: "Novembro",
-    value: "Novembro",
+    label: monthsToLabel.november,
+    value: monthsToLabel.november,
   },
   {
-    label: "Dezembro",
-    value: "Dezembro",
+    label: monthsToLabel.dezember,
+    value: monthsToLabel.dezember,
+  },
+];
+
+export const monthListEnumAndValue = [
+  {
+    enum: MonthOptionsToFilterEnum.JANUARY,
+    label: monthsToLabel.january,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.FEBRUARY,
+    label: monthsToLabel.february,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.MARCH,
+    label: monthsToLabel.march,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.APRIL,
+    label: monthsToLabel.april,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.MAY,
+    label: monthsToLabel.may,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.JUNE,
+    label: monthsToLabel.june,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.JULY,
+    label: monthsToLabel.july,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.AUGUST,
+    label: monthsToLabel.august,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.SEPTEMBER,
+    label: monthsToLabel.september,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.OCTOBER,
+    label: monthsToLabel.october,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.NOVEMBER,
+    label: monthsToLabel.november,
+  },
+  {
+    enum: MonthOptionsToFilterEnum.DECEMBER,
+    label: monthsToLabel.dezember,
   },
 ];
