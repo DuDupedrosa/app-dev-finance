@@ -3,4 +3,5 @@ export type ExpenseDataType = {
   date: string;
   value: number;
   userId: string;
+  id: number;
 };

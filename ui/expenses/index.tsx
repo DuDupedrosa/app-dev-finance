@@ -24,6 +24,7 @@ import { formatCurrencyBRL } from "@/helpers/methods/formatCurrency";
 import GetExpenseIcon from "../components/GetExpenseIcon";
 import { getMonth } from "date-fns";
 import { useNavigation, router } from "expo-router";
+import DeleteExpense from "./components/DeleteExpense";
 
 export default function ExpensesComponent() {
   const [month, setMonth] = useState<string>();
@@ -36,6 +37,14 @@ export default function ExpensesComponent() {
     getMonth(new Date())
   );
   const { navigate } = useNavigation();
+  const [deleteExpense, setDeleteExpense] = useState<{
+    id: number;
+    value: number;
+    date: string;
+    index: number;
+  } | null>(null);
+  const [deleteExpenseLoading, setDeleteExpenseLoading] =
+    useState<boolean>(false);
 
   const CustomInput = (props: any) => (
     <TextInput
@@ -71,6 +80,29 @@ export default function ExpensesComponent() {
       (monthObject) => monthObject.enum === currentMonth
     );
     setMonth(findMonth?.label);
+  }
+
+  function handleDeleteExpense(expense: ExpenseDataType, index: number) {
+    setDeleteExpense({
+      id: expense.id,
+      value: expense.value,
+      date: expense.date,
+      index,
+    });
+  }
+
+  async function deleteExpenseSubmit() {
+    setDeleteExpenseLoading(true);
+    try {
+      if (!deleteExpense) return;
+
+      await http.delete(`expense/${deleteExpense.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDeleteExpense(null);
+      await getExpenses({ month: currentMonth });
+    } catch (err) {}
+    setDeleteExpenseLoading(false);
   }
 
   useEffect(() => {
@@ -147,49 +179,72 @@ export default function ExpensesComponent() {
               expenses.length > 0 &&
               expenses.map((expense, i) => {
                 return (
-                  <View style={styles.listItem} key={i}>
-                    {/* imagem + nome */}
-                    <View style={styles.listItemFirstColumn}>
-                      <View
-                        style={{
-                          ...styles.listIcon,
-                          backgroundColor: getCategoryStyles(expense.categoryId)
-                            .boxColor,
-                        }}
-                      >
-                        {<GetExpenseIcon expenseEnum={expense.categoryId} />}
-                      </View>
-                      <Text variant="labelMedium" style={styles.categoryTitle}>
-                        {getCategoryStyles(expense.categoryId).label}
-                      </Text>
-                    </View>
-
-                    {/* valor + data */}
-                    <View style={styles.listItemSecondColumn}>
-                      <View style={styles.listItemValueAndDateContainer}>
+                  <View>
+                    <View style={styles.listItem} key={i}>
+                      {/* imagem + nome */}
+                      <View style={styles.listItemFirstColumn}>
+                        <View
+                          style={{
+                            ...styles.listIcon,
+                            backgroundColor: getCategoryStyles(
+                              expense.categoryId
+                            ).boxColor,
+                          }}
+                        >
+                          {<GetExpenseIcon expenseEnum={expense.categoryId} />}
+                        </View>
                         <Text
                           variant="labelMedium"
-                          style={styles.listItemExpenseValue}
+                          style={styles.categoryTitle}
                         >
-                          {formatCurrencyBRL(expense.value)}
-                        </Text>
-                        <Text
-                          variant="labelSmall"
-                          style={styles.listItemExpenseDate}
-                        >
-                          {formatDateHelper(expense.date, "dd MMM yyyy, HH:mm")}
+                          {getCategoryStyles(expense.categoryId).label}
                         </Text>
                       </View>
-                      <TouchableOpacity>
-                        <View style={styles.listItemDeleteButton}>
-                          <AntDesign
-                            name="delete"
-                            size={20}
-                            color={customTheme.colors["red-600"]}
-                          />
+
+                      {/* valor + data */}
+                      <View style={styles.listItemSecondColumn}>
+                        <View style={styles.listItemValueAndDateContainer}>
+                          <Text
+                            variant="labelMedium"
+                            style={styles.listItemExpenseValue}
+                          >
+                            {formatCurrencyBRL(expense.value)}
+                          </Text>
+                          <Text
+                            variant="labelSmall"
+                            style={styles.listItemExpenseDate}
+                          >
+                            {formatDateHelper(
+                              expense.date,
+                              "dd MMM yyyy, HH:mm"
+                            )}
+                          </Text>
                         </View>
-                      </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => handleDeleteExpense(expense, i)}
+                        >
+                          <View style={styles.listItemDeleteButton}>
+                            <AntDesign
+                              name="delete"
+                              size={20}
+                              color={customTheme.colors["red-600"]}
+                            />
+                          </View>
+                        </TouchableOpacity>
+                      </View>
                     </View>
+                    {deleteExpense && deleteExpense.index === i && (
+                      <DeleteExpense
+                        onDelete={async () => deleteExpenseSubmit()}
+                        loading={deleteExpenseLoading}
+                        formattedDate={formatDateHelper(
+                          expense.date,
+                          "dd MMM yyyy, HH:mm"
+                        )}
+                        formattedValue={formatCurrencyBRL(expense.value)}
+                        onClose={() => setDeleteExpense(null)}
+                      />
+                    )}
                   </View>
                 );
               })}
