@@ -25,6 +25,7 @@ import GetExpenseIcon from "../components/GetExpenseIcon";
 import { getMonth } from "date-fns";
 import { useNavigation, router } from "expo-router";
 import DeleteExpense from "./components/DeleteExpense";
+import NotFoundItems from "./components/NotFondItems";
 
 export default function ExpensesComponent() {
   const [month, setMonth] = useState<string>();
@@ -160,16 +161,21 @@ export default function ExpensesComponent() {
 
         <View style={styles.headerList}>
           <Text variant="headlineSmall">Transações</Text>
-          <TouchableOpacity>
-            <Button
-              onPress={() => router.push("/(tabs)/addSpent")}
-              textColor={customTheme.colors.light}
-              buttonColor={customTheme.colors["primary-600"]}
-            >
-              Nova transação
-            </Button>
-          </TouchableOpacity>
+
+          {!loading && expenses && expenses.length > 0 && (
+            <TouchableOpacity>
+              <Button
+                onPress={() => router.push("/(tabs)/addSpent")}
+                textColor={customTheme.colors.light}
+                buttonColor={customTheme.colors["primary-600"]}
+              >
+                Nova transação
+              </Button>
+            </TouchableOpacity>
+          )}
         </View>
+
+        {!loading && expenses.length <= 0 && <NotFoundItems />}
 
         {/* lista */}
         {!loading && (
@@ -179,8 +185,8 @@ export default function ExpensesComponent() {
               expenses.length > 0 &&
               expenses.map((expense, i) => {
                 return (
-                  <View>
-                    <View style={styles.listItem} key={i}>
+                  <View key={i}>
+                    <View style={styles.listItem}>
                       {/* imagem + nome */}
                       <View style={styles.listItemFirstColumn}>
                         <View
