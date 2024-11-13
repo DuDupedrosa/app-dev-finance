@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-paper-dropdown";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import {
   monthListEnumAndValue,
@@ -21,11 +20,12 @@ import { ExpenseDataType } from "@/types/expense";
 import getCategoryStyles from "@/helpers/methods/getCategoryStyles";
 import { formatDateHelper } from "@/helpers/methods/formatDate";
 import { formatCurrencyBRL } from "@/helpers/methods/formatCurrency";
-import GetExpenseIcon from "../components/GetExpenseIcon";
+import GetExpenseIcon from "../../components/GetExpenseIcon";
 import { getMonth } from "date-fns";
 import { useNavigation, router } from "expo-router";
 import DeleteExpense from "./components/DeleteExpense";
 import NotFoundItems from "./components/NotFondItems";
+import Toast from "react-native-toast-message";
 
 export default function ExpensesComponent() {
   const [month, setMonth] = useState<string>();
@@ -101,6 +101,11 @@ export default function ExpensesComponent() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDeleteExpense(null);
+      Toast.show({
+        type: "success", // outros tipos: 'error', 'info'
+        text1: "Sucesso",
+        text2: "Transação deletada com sucesso.",
+      });
       await getExpenses({ month: currentMonth });
     } catch (err) {}
     setDeleteExpenseLoading(false);
