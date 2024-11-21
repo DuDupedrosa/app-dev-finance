@@ -78,6 +78,23 @@ export default function HomeComponent() {
   return (
     <View style={styles.container}>
       <ScrollView>
+        {username && username.length > 0 && (
+          <View>
+            <Text variant="headlineLarge" style={styles.title}>
+              Olá, {username}{" "}
+              <MaterialIcons
+                name="waving-hand"
+                size={24}
+                color={customTheme.colors["yellow-500"]}
+              />
+            </Text>
+
+            <Text variant="labelSmall" style={styles.subtitle}>
+              Última atualização:{" "}
+              {format(new Date(), "dd MMM yyyy, HH:mm", { locale: ptBR })}
+            </Text>
+          </View>
+        )}
         {loading && (
           <View style={{ marginTop: 64 }}>
             <ActivityIndicator
@@ -89,14 +106,6 @@ export default function HomeComponent() {
         )}
         {!loading && (
           <View>
-            <Text variant="headlineLarge" style={styles.title}>
-              Olá, {username}
-            </Text>
-            <Text variant="labelSmall" style={styles.subtitle}>
-              Última atualização:{" "}
-              {format(new Date(), "dd MMM yyyy, HH:mm", { locale: ptBR })}
-            </Text>
-
             <View style={styles.cardMain}>
               <View style={styles.cardMainHeader}>
                 <View>
@@ -237,6 +246,7 @@ export default function HomeComponent() {
 
 const styles = StyleSheet.create({
   container: { padding: 16, flex: 1 },
+
   title: {
     color: customTheme.colors["gray-900"],
     fontWeight: "600",

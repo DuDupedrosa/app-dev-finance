@@ -21,6 +21,8 @@ import CurrencyInput from "react-native-currency-input";
 import { http } from "@/api/http";
 import { AlertDefaultData, AlertDefaultType } from "@/types/alert";
 import AlertComponent from "@/ui/components/AlertComponents";
+import BreadCrumb from "@/ui/components/BreadCrumb";
+import PageTitle from "@/ui/components/PageTitle";
 
 export default function AddSpent() {
   const translateX = useSharedValue(300);
@@ -259,16 +261,10 @@ export default function AddSpent() {
       style={{ backgroundColor: customTheme.colors.light, flex: 1 }}
     >
       <ScrollView>
-        <View style={styles.container}>
-          <View style={{ marginBottom: 32 }}>
-            <Text variant="headlineMedium" style={styles.title}>
-              Adicionar novo gasto
-            </Text>
-            <Text variant="labelMedium" style={styles.subtitle}>
-              Preencha os campos abaixo para salvar um novo gasto.
-            </Text>
-          </View>
+        <BreadCrumb route="Nova transação" />
 
+        <View style={styles.container}>
+          <PageTitle title="Adicionar Nova Despesa" />
           {/* form */}
           <View style={styles.formContainer}>
             {/* tratamento a parte */}
@@ -415,8 +411,10 @@ export default function AddSpent() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
     flex: 1,
+    marginTop: 32,
   },
   title: {
     color: customTheme.colors.black,

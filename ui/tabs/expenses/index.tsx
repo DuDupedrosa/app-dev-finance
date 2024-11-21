@@ -26,6 +26,7 @@ import { useNavigation, router } from "expo-router";
 import DeleteExpense from "./components/DeleteExpense";
 import NotFoundItems from "../../components/NotFondItems";
 import Toast from "react-native-toast-message";
+import PageTitle from "@/ui/components/PageTitle";
 
 export default function ExpensesComponent() {
   const [month, setMonth] = useState<string>();
@@ -149,6 +150,8 @@ export default function ExpensesComponent() {
   return (
     <ScrollView>
       <View style={styles.container}>
+        <PageTitle title="Meus Gastos e Despesas" />
+
         <View style={styles.referenceMonthContainer}>
           <Text variant="labelLarge" {...styles.referenceMonthLabel}>
             Mês de referência
@@ -277,12 +280,12 @@ export default function ExpensesComponent() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
     flex: 1,
-  },
-  referenceMonthContainer: {
     marginTop: 32,
   },
+  referenceMonthContainer: {},
   referenceMonthLabel: {
     color: customTheme.colors.black,
     marginBottom: 8,

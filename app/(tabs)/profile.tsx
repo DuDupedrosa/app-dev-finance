@@ -18,6 +18,8 @@ import FormChangePassword from "@/ui/tabs/profile/FormChangePassword";
 import { ActivityIndicator, MD2Colors } from "react-native-paper";
 import PageSpinner from "@/ui/components/PageSpinner";
 import { getUserData } from "@/helpers/methods/asyncStorage";
+import BreadCrumb from "@/ui/components/BreadCrumb";
+import PageTitle from "@/ui/components/PageTitle";
 
 const StepsEnum = {
   USER_DATA: 1,
@@ -77,19 +79,11 @@ export default function ProfileScreen() {
     <SafeAreaView
       style={{ backgroundColor: customTheme.colors.light, flex: 1 }}
     >
+      <BreadCrumb route="Meu perfil" />
       <ScrollView>
         <Animated.View style={[styles.container, animatedStyle]}>
-          {(username || (userData && !loading)) && (
-            <>
-              <Text variant="headlineMedium" style={styles.title}>
-                Olá, {username ?? userData?.name}
-              </Text>
-              <Text variant="labelMedium" style={styles.subtitle}>
-                Edite os detalhes da sua conta para garantir que tudo esteja
-                correto e atualizado.
-              </Text>
-            </>
-          )}
+          <PageTitle title="Configurações de Perfil" />
+
           {userData && !loading && (
             <View>
               <View>
@@ -160,8 +154,10 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
     flex: 1,
+    marginTop: 32,
   },
   title: {
     color: customTheme.colors.black,
@@ -175,7 +171,6 @@ const styles = StyleSheet.create({
   tabsButtonContainer: {
     flexDirection: "row",
     gap: 20,
-    marginTop: 64,
     marginBottom: 32,
   },
   tabsButton: {

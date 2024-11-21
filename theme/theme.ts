@@ -50,5 +50,9 @@ export const customTheme = {
 
     "green-500": "#22c55e",
     "green-600": "#16A34A",
+
+    "yellow-400": "#facc15",
+    "yellow-500": "#eab308",
+    "yellow-600": "#ca8a04",
   },
 };
