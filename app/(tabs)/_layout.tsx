@@ -1,10 +1,11 @@
-import { Tabs } from "expo-router";
+import { Tabs, useNavigation, router } from "expo-router";
 import React from "react";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { customTheme } from "@/theme/theme";
+import { Button } from "react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -60,6 +61,15 @@ export default function TabLayout() {
           title: "Perfil",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={"person"} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="logout"
+        options={{
+          title: "Sair",
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={"log-out"} color={color} />
           ),
         }}
       />
