@@ -26,6 +26,28 @@ const StepsEnum = {
   USER_CHANGE_PASSWORD: 2,
 };
 
+function ActiveButton({ label }: { label: string }) {
+  return (
+    <Button
+      style={styles.tabsButtonActive}
+      textColor={customTheme.colors.light}
+    >
+      {label}
+    </Button>
+  );
+}
+
+function InActiveButton({ label }: { label: string }) {
+  return (
+    <Button
+      style={styles.tabsButton}
+      textColor={customTheme.colors["gray-600"]}
+    >
+      {label}
+    </Button>
+  );
+}
+
 export default function ProfileScreen() {
   const translateX = useSharedValue(300);
   const [userData, setUserData] = useState<User | null>(null);
@@ -92,40 +114,24 @@ export default function ProfileScreen() {
                     style={{ flex: 1 }}
                     onPress={() => setStep(StepsEnum.USER_DATA)}
                   >
-                    <Button
-                      style={
-                        step === StepsEnum.USER_DATA
-                          ? styles.tabsButtonActive
-                          : styles.tabsButton
-                      }
-                      textColor={
-                        step === StepsEnum.USER_DATA
-                          ? customTheme.colors.light
-                          : customTheme.colors["gray-600"]
-                      }
-                    >
-                      Básico
-                    </Button>
+                    {step === StepsEnum.USER_DATA && (
+                      <ActiveButton label="Básico" />
+                    )}
+                    {step !== StepsEnum.USER_DATA && (
+                      <InActiveButton label="Básico" />
+                    )}
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={{ flex: 1 }}
                     onPress={() => setStep(StepsEnum.USER_CHANGE_PASSWORD)}
                   >
-                    <Button
-                      style={
-                        step === StepsEnum.USER_CHANGE_PASSWORD
-                          ? styles.tabsButtonActive
-                          : styles.tabsButton
-                      }
-                      textColor={
-                        step === StepsEnum.USER_CHANGE_PASSWORD
-                          ? customTheme.colors.light
-                          : customTheme.colors["gray-600"]
-                      }
-                    >
-                      Alterar senha
-                    </Button>
+                    {step === StepsEnum.USER_CHANGE_PASSWORD && (
+                      <ActiveButton label="Alterar senha" />
+                    )}
+                    {step !== StepsEnum.USER_CHANGE_PASSWORD && (
+                      <InActiveButton label="Alterar senha" />
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>
