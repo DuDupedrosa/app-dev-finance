@@ -36,11 +36,19 @@ export const customTheme = {
     "gray-800": "#1f2937",
     "gray-900": "#111827",
 
+    // custom-gray
+    "custom-gray-1": "#4A4A4A",
+    "custom-gray-2": "#6e6e6e ",
+    "custom-gray-3": "#9e9e9e ",
+
     //blue
     "blue-400": "#60a5fa",
     "blue-500": "#3b82f6",
     "blue-600": "#2563eb",
     "blue-700": "#1d4ed8",
     "blue-800": "#1e40af",
+
+    "green-500": "#22c55e",
+    "green-600": "#16A34A",
   },
 };

@@ -63,7 +63,6 @@ export default function LoginPage() {
       let payload = userData;
       const { data } = await http.post(`user/signin`, payload);
       const { token, user } = data.content;
-
       router.push({
         pathname: "/(tabs)/profile",
       });
@@ -72,6 +71,7 @@ export default function LoginPage() {
         ["username", user.name],
       ]);
     } catch (err) {
+      console.warn(err);
       if (axios.isAxiosError(err)) {
         const errResp = err.response;
 

@@ -24,14 +24,14 @@ import GetExpenseIcon from "../../components/GetExpenseIcon";
 import { getMonth } from "date-fns";
 import { useNavigation, router } from "expo-router";
 import DeleteExpense from "./components/DeleteExpense";
-import NotFoundItems from "./components/NotFondItems";
+import NotFoundItems from "../../components/NotFondItems";
 import Toast from "react-native-toast-message";
 
 export default function ExpensesComponent() {
   const [month, setMonth] = useState<string>();
   const [token, setToken] = useState<string>("");
   const [username, setUsername] = useState<string>("");
-  const [expenses, setExpenses] = useState<ExpenseDataType[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseDataType[] | null>(null);
   const [firstGetExpense, setFirstGetExpense] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [currentMonth, setCurrentMonth] = useState<number>(
@@ -180,7 +180,7 @@ export default function ExpensesComponent() {
           )}
         </View>
 
-        {!loading && expenses.length <= 0 && <NotFoundItems />}
+        {!loading && (!expenses || expenses.length <= 0) && <NotFoundItems />}
 
         {/* lista */}
         {!loading && (
