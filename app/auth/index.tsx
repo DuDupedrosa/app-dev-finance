@@ -71,7 +71,6 @@ export default function LoginPage() {
         ["username", user.name],
       ]);
     } catch (err) {
-      console.warn(err);
       if (axios.isAxiosError(err)) {
         const errResp = err.response;
 

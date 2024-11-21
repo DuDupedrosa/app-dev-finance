@@ -4,6 +4,7 @@ const httpErroKeysMessage: {
   internal_server_erro: string;
   incorrect_current_password: string;
   new_password_is_the_same_current: string;
+  email_already_register: string;
 } = {
   incorrect_password:
     "A senha informada está incorreta. Por favor, tente novamente ou redefina sua senha.",
@@ -14,6 +15,8 @@ const httpErroKeysMessage: {
   incorrect_current_password: "Senha atual incorreta.",
   new_password_is_the_same_current:
     "A nova senha, precisa ser diferente da senha atual.",
+  email_already_register:
+    "Este e-mail já está registrado na plataforma. Por favor, insira um e-mail diferente.",
 };
 
 export default httpErroKeysMessage;

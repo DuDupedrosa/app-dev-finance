@@ -85,11 +85,24 @@ export default function RegisterPage() {
       setSuccessRegister(true);
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        if (err.response?.status) {
-          setAlert({
-            isVisible: true,
-            text: httpErroKeysMessage.internal_server_erro,
-          });
+        const errResp = err.response;
+
+        if (errResp) {
+          if (errResp.status !== HttpStatusCode.InternalServerError) {
+            const errorKey = errResp.data
+              .message as keyof typeof httpErroKeysMessage;
+            const httpKey = httpErroKeysMessage[errorKey];
+
+            setAlert({
+              isVisible: true,
+              text: httpKey ? httpErroKeysMessage[errorKey] : errorKey,
+            });
+          } else {
+            setAlert({
+              isVisible: true,
+              text: httpErroKeysMessage.internal_server_erro,
+            });
+          }
         }
       }
     }

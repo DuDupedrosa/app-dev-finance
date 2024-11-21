@@ -19,6 +19,11 @@ http.interceptors.response.use(
     if (error.response) {
       if (error.response.status === axios.HttpStatusCode.Unauthorized) {
         // Redireciona para a tela de login quando o status for 401 (não autorizado)
+        Toast.show({
+          type: "error",
+          text1: "Erro",
+          text2: "Sem autorização! Faça o login para continuar.",
+        });
         router.push("/auth");
       } else if (
         error.response.status === axios.HttpStatusCode.InternalServerError
