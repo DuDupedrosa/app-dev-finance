@@ -68,8 +68,16 @@ export default function RegisterPage() {
     setSuccessRegister(false);
 
     try {
-      if (!validEmail) return;
-      if (typeof validPassword === "object") return;
+      if (!isValidEmail()) {
+        setLoading(false);
+        return;
+      }
+
+      if (typeof handleValidatePassword() === "object") {
+        setLoading(false);
+        return;
+      }
+
       let payload = { ...userData };
 
       await http.post(`user/register`, payload);
@@ -91,7 +99,9 @@ export default function RegisterPage() {
   function isValidEmail() {
     const email = getValues("email");
     const emailRegex = regexpEmail;
-    setValidEmail(emailRegex.test(email));
+    const valid = emailRegex.test(email);
+    setValidEmail(valid);
+    return valid;
   }
 
   function handleValidatePassword() {
@@ -99,6 +109,7 @@ export default function RegisterPage() {
     const result = validatePassword(password);
 
     setValidPassword(result);
+    return result;
   }
 
   useEffect(() => {

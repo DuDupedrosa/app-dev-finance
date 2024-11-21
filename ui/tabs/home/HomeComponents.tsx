@@ -45,7 +45,7 @@ export default function HomeComponent() {
   async function getExpenses() {
     setLoading(true);
     try {
-      const originUrl = `expense/list-all?month=${currentMonth}?maxSize=10`;
+      const originUrl = `expense/list-all?month=${currentMonth}&maxSize=10`;
 
       const { data } = await http.get(originUrl, {
         headers: { Authorization: `Bearer ${token}` },
