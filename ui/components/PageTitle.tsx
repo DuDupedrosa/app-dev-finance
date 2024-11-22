@@ -16,7 +16,7 @@ export default function PageTitle({ title }: { title: string }) {
           width: 12,
           height: 12,
           display: "flex",
-          backgroundColor: customTheme.colors["primary-600"],
+          backgroundColor: customTheme.colors["green-600"],
           borderRadius: 100,
           marginTop: 12,
         }}

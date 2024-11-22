@@ -21,7 +21,7 @@ export default function AuthActionButtonAndLink({
           style={{ opacity: loading ? 0.8 : 1 }}
           loading={loading}
           onPress={() => onSubmit()}
-          buttonColor={colors.primary}
+          buttonColor={customTheme.colors["primary-600"]}
           textColor={customTheme.colors.light}
         >
           {isLogin ? "Entrar" : "Cadastrar"}

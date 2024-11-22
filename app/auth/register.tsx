@@ -277,7 +277,7 @@ export default function RegisterPage() {
               />
               <Button
                 onPress={() => router.push("/auth")}
-                buttonColor={colors.primary}
+                buttonColor={customTheme.colors["primary-600"]}
                 textColor={customTheme.colors.light}
               >
                 Entrar na plataforma
