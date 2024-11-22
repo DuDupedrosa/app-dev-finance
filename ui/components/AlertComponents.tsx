@@ -20,7 +20,7 @@ export default function AlertComponent({
   function getAlertStylesByType() {
     const literal = {
       ["success"]: {
-        bg: customTheme.colors["primary-500"],
+        bg: customTheme.colors["green-500"],
       },
       ["erro"]: {
         bg: customTheme.colors["red-600"],
