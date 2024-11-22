@@ -27,7 +27,7 @@ export default function homePage() {
   const [token, setToken] = useState<string>("");
 
   function handleRedirect() {
-    if (token && token.length) {
+    if (token && token.length && token !== "logout") {
       router.push("/(tabs)");
       return;
     }
