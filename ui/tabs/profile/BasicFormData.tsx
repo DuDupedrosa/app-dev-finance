@@ -1,6 +1,6 @@
 import { customTheme } from "@/theme/theme";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { Button, Text, TextInput } from "react-native-paper";
+import { ActivityIndicator, Button, Text, TextInput } from "react-native-paper";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import InputErroMessage from "@/ui/components/InputErroMessage";
@@ -10,6 +10,11 @@ import { regexpEmail } from "@/helpers/regexp/email";
 import { AlertDefaultData, AlertDefaultType } from "@/types/alert";
 import { User } from "@/types/user";
 import { http } from "@/api/http";
+import { router } from "expo-router";
+import DeleteExpense from "../expenses/components/DeleteExpense";
+import Animated from "react-native-reanimated";
+import DeleteAccountCard from "./DeleteAccountCard";
+import Toast from "react-native-toast-message";
 
 interface UserDataToUpdate {
   name: string;
@@ -42,6 +47,9 @@ export default function BasicFormData({
   });
   const [alertType, setAlertType] = useState<AlertDefaultType>("success");
   const [validEmail, setValidEmail] = useState<boolean>(true);
+  const [deleteAccount, setDeleteAccount] = useState<boolean>(false);
+  const [deleteAccountLoading, setDeleteAccountLoading] =
+    useState<boolean>(false);
 
   const {
     control,
@@ -59,6 +67,28 @@ export default function BasicFormData({
     setValue("cellphone", cellphone ?? "");
 
     onSuccess(data);
+  }
+
+  async function deleteAccountAsync() {
+    setDeleteAccountLoading(true);
+    try {
+      await http.delete("user", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      Toast.show({
+        type: "success", // outros tipos: 'error', 'info'
+        text1: "Sucesso",
+        text2: "Conta deleta com sucesso.",
+      });
+      router.push("/auth");
+    } catch (err) {
+      Toast.show({
+        type: "error",
+        text1: "Erro",
+        text2: "Um erro aconteceu, tente novamente mais tarde.",
+      });
+    }
+    setDeleteAccountLoading(false);
   }
 
   const onSubmit = handleSubmit(async (userDataToUpdate) => {
@@ -246,7 +276,26 @@ export default function BasicFormData({
               buttonColor={customTheme.colors["primary-600"]}
               textColor={customTheme.colors.light}
             >
-              Editar
+              Salvar alterações
+            </Button>
+          </TouchableOpacity>
+
+          {deleteAccount && (
+            <DeleteAccountCard
+              loading={deleteAccountLoading}
+              onDelete={async () => await deleteAccountAsync()}
+              onCancel={() => setDeleteAccount(false)}
+            />
+          )}
+
+          <TouchableOpacity>
+            <Button
+              onPress={() => setDeleteAccount(true)}
+              mode="outlined"
+              textColor={customTheme.colors["red-600"]}
+              style={styles.buttonDeleteAccount}
+            >
+              Deletar conta
             </Button>
           </TouchableOpacity>
         </View>
@@ -256,6 +305,11 @@ export default function BasicFormData({
 }
 
 const styles = StyleSheet.create({
+  buttonDeleteAccount: {
+    borderColor: customTheme.colors["red-600"], // Borda vermelha
+    borderWidth: 2, // Espessura da borda
+    backgroundColor: "transparent", // Fundo transparente
+  },
   formContainer: {
     gap: 20,
   },
