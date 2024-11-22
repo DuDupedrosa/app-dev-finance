@@ -1,8 +1,13 @@
 import { customTheme } from "@/theme/theme";
 import { DefaultRouterParams } from "@/types/defaultRouterParams";
 import { User } from "@/types/user";
-import { Link, useLocalSearchParams, router } from "expo-router";
-import { useEffect, useState } from "react";
+import {
+  Link,
+  useLocalSearchParams,
+  router,
+  useFocusEffect,
+} from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   StyleSheet,
   TouchableOpacity,
@@ -13,20 +18,36 @@ import {
 import { Button, Text } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { getUserData } from "@/helpers/methods/asyncStorage";
+import Feather from "@expo/vector-icons/Feather";
 
 export default function homePage() {
   const [userData, setUserData] = useState<User | null>(null);
-  const { user, token } = useLocalSearchParams<DefaultRouterParams>();
-
-  useEffect(() => {
-    if (user) {
-      setUserData(JSON.parse(user));
-    }
-  }, [user]);
+  const [userName, setUserName] = useState<string>("");
+  const [token, setToken] = useState<string>("");
 
   function handleRedirect() {
+    if (token && token.length) {
+      router.push("/(tabs)");
+      return;
+    }
+
     router.push("/auth");
   }
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadUserData = async () => {
+        const user = await getUserData();
+
+        if (user) {
+          if (user.token) setToken(user.token);
+          if (user.username) setUserName(user.username);
+        }
+      };
+      loadUserData();
+    }, [])
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -45,6 +66,13 @@ export default function homePage() {
               onPress={() => handleRedirect()}
               style={styles.loginButton}
             >
+              {userName && userName.length > 0 && (
+                <Feather
+                  name="user"
+                  size={24}
+                  color={customTheme.colors["gray-400"]}
+                />
+              )}
               <Text
                 variant="labelLarge"
                 style={{
@@ -52,7 +80,7 @@ export default function homePage() {
                   color: customTheme.colors["gray-400"],
                 }}
               >
-                Login
+                {userName && userName.length > 0 ? userName : "Login"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -129,11 +157,17 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     backgroundColor: customTheme.colors["gray-900"],
-    width: 120,
     borderRadius: 8,
     padding: 8,
     borderWidth: 1,
     borderColor: customTheme.colors["primary-600"],
+    flexDirection: "row",
+    gap: 4,
+    alignItems: "center",
+    alignSelf: "flex-start", // Garante que o botão não ocupe 100% da largura do container,
+    maxWidth: 300,
+    minWidth: 80,
+    justifyContent: "center",
   },
   moneyIcon: {
     borderRadius: 100,
