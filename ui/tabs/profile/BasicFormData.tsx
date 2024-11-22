@@ -15,6 +15,7 @@ import DeleteExpense from "../expenses/components/DeleteExpense";
 import Animated from "react-native-reanimated";
 import DeleteAccountCard from "./DeleteAccountCard";
 import Toast from "react-native-toast-message";
+import { storeUserData } from "@/helpers/methods/asyncStorage";
 
 interface UserDataToUpdate {
   name: string;
@@ -80,6 +81,7 @@ export default function BasicFormData({
         text1: "Sucesso",
         text2: "Conta deleta com sucesso.",
       });
+      storeUserData("", "");
       router.push("/auth");
     } catch (err) {
       Toast.show({

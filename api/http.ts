@@ -2,6 +2,7 @@ import { router } from "expo-router";
 
 import axios from "axios";
 import Toast from "react-native-toast-message";
+import { storeUserData } from "@/helpers/methods/asyncStorage";
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 export const http = axios.create({
   baseURL: apiUrl,
@@ -19,6 +20,7 @@ http.interceptors.response.use(
     if (error.response) {
       if (error.response.status === axios.HttpStatusCode.Unauthorized) {
         // Redireciona para a tela de login quando o status for 401 (não autorizado)
+        storeUserData("", "");
         Toast.show({
           type: "error",
           text1: "Erro",

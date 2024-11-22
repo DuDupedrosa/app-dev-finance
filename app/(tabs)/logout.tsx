@@ -6,6 +6,7 @@ import { storeUserData } from "@/helpers/methods/asyncStorage";
 
 export default function Logout() {
   useEffect(() => {
+    storeUserData("", "");
     router.push("/auth");
   }, []);
   return <SafeAreaView></SafeAreaView>;
