@@ -47,39 +47,31 @@ function InActiveButton({ label }: { label: string }) {
 }
 
 export default function ProfileScreen() {
-  const translateX = useSharedValue(300);
+  const opacity = useSharedValue(0); // Para fade-in
+  const scale = useSharedValue(0.95); // Para efeito de crescimento
   const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [step, setStep] = useState<number>(StepsEnum.USER_DATA);
   const [token, setToken] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
+  const [animationKey, setAnimationKey] = useState(0);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateX: translateX.value }],
+      opacity: opacity.value,
+      transform: [{ scale: scale.value }],
     };
   });
 
   useFocusEffect(
     useCallback(() => {
-      translateX.value = withTiming(0, {
-        duration: 500,
-        easing: Easing.out(Easing.exp),
-      });
-
       const loadUserData = async () => {
         const user = await getUserData();
 
         if (user) {
           if (user.token) setToken(user.token);
-          if (user.username) setUsername(user.username);
         }
       };
       loadUserData();
-
-      return () => {
-        // Limpeza, se necessário
-      };
     }, [])
   );
 
@@ -95,6 +87,20 @@ export default function ProfileScreen() {
           setUserData(data.content);
         } catch (err) {}
         setLoading(false);
+
+        // Reinicia a animação
+        setAnimationKey((prevKey) => prevKey + 1);
+        opacity.value = 0; // Reinicia a opacidade
+        scale.value = 0.95; // Reinicia a escala
+
+        opacity.value = withTiming(1, {
+          duration: 600,
+          easing: Easing.ease,
+        });
+        scale.value = withTiming(1, {
+          duration: 600,
+          easing: Easing.ease,
+        });
       };
 
       if (token && token.length) {
@@ -109,55 +115,55 @@ export default function ProfileScreen() {
     >
       <BreadCrumb route="Meu perfil" />
       <ScrollView>
-        <Animated.View style={[styles.container, animatedStyle]}>
-          <PageTitle title="Configurações de Perfil" />
-
-          {userData && !loading && (
+        {userData && !loading && (
+          <Animated.View
+            key={animationKey}
+            style={[styles.container, animatedStyle]}
+          >
+            <PageTitle title="Configurações de Perfil" />
             <View>
-              <View>
-                <View style={styles.tabsButtonContainer}>
-                  <TouchableOpacity
-                    style={{ flex: 1 }}
-                    onPress={() => setStep(StepsEnum.USER_DATA)}
-                  >
-                    {step === StepsEnum.USER_DATA && (
-                      <ActiveButton label="Básico" />
-                    )}
-                    {step !== StepsEnum.USER_DATA && (
-                      <InActiveButton label="Básico" />
-                    )}
-                  </TouchableOpacity>
+              <View style={styles.tabsButtonContainer}>
+                <TouchableOpacity
+                  style={{ flex: 1 }}
+                  onPress={() => setStep(StepsEnum.USER_DATA)}
+                >
+                  {step === StepsEnum.USER_DATA && (
+                    <ActiveButton label="Básico" />
+                  )}
+                  {step !== StepsEnum.USER_DATA && (
+                    <InActiveButton label="Básico" />
+                  )}
+                </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={{ flex: 1 }}
-                    onPress={() => setStep(StepsEnum.USER_CHANGE_PASSWORD)}
-                  >
-                    {step === StepsEnum.USER_CHANGE_PASSWORD && (
-                      <ActiveButton label="Alterar senha" />
-                    )}
-                    {step !== StepsEnum.USER_CHANGE_PASSWORD && (
-                      <InActiveButton label="Alterar senha" />
-                    )}
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  style={{ flex: 1 }}
+                  onPress={() => setStep(StepsEnum.USER_CHANGE_PASSWORD)}
+                >
+                  {step === StepsEnum.USER_CHANGE_PASSWORD && (
+                    <ActiveButton label="Alterar senha" />
+                  )}
+                  {step !== StepsEnum.USER_CHANGE_PASSWORD && (
+                    <InActiveButton label="Alterar senha" />
+                  )}
+                </TouchableOpacity>
               </View>
-
-              {step === StepsEnum.USER_DATA && (
-                <BasicFormData
-                  token={token}
-                  userData={userData}
-                  onSuccess={(editedUser) => {
-                    let edited = { ...userData, ...editedUser };
-                    setUserData(edited);
-                  }}
-                />
-              )}
-              {step === StepsEnum.USER_CHANGE_PASSWORD && (
-                <FormChangePassword token={token} />
-              )}
             </View>
-          )}
-        </Animated.View>
+
+            {step === StepsEnum.USER_DATA && (
+              <BasicFormData
+                token={token}
+                userData={userData}
+                onSuccess={(editedUser) => {
+                  let edited = { ...userData, ...editedUser };
+                  setUserData(edited);
+                }}
+              />
+            )}
+            {step === StepsEnum.USER_CHANGE_PASSWORD && (
+              <FormChangePassword token={token} />
+            )}
+          </Animated.View>
+        )}
       </ScrollView>
       {loading && <PageSpinner />}
     </SafeAreaView>

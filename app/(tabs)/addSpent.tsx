@@ -7,8 +7,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ActivityIndicator, Button, Text, TextInput } from "react-native-paper";
-import { useEffect, useState } from "react";
-import { Easing, useSharedValue, withTiming } from "react-native-reanimated";
+import { useCallback, useEffect, useState } from "react";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { customTheme } from "@/theme/theme";
 import { Dropdown } from "react-native-paper-dropdown";
 import { getUserData } from "@/helpers/methods/asyncStorage";
@@ -23,8 +28,12 @@ import { AlertDefaultData, AlertDefaultType } from "@/types/alert";
 import AlertComponent from "@/ui/components/AlertComponents";
 import BreadCrumb from "@/ui/components/BreadCrumb";
 import PageTitle from "@/ui/components/PageTitle";
+import { useFocusEffect } from "expo-router";
 
 export default function AddSpent() {
+  const [animationKey, setAnimationKey] = useState(0);
+  const opacity = useSharedValue(0); // Para fade-in
+  const scale = useSharedValue(0.95); // Para efeito de crescimento
   const translateX = useSharedValue(300);
   const [loading, setLoading] = useState<boolean>(false);
   const [token, setToken] = useState<string>("");
@@ -222,6 +231,30 @@ export default function AddSpent() {
     }
   }, [token]);
 
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ scale: scale.value }],
+    };
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      setAnimationKey((prevKey) => prevKey + 1);
+      opacity.value = 0; // Reinicia a opacidade
+      scale.value = 0.95; // Reinicia a escala
+
+      opacity.value = withTiming(1, {
+        duration: 600,
+        easing: Easing.ease,
+      });
+      scale.value = withTiming(1, {
+        duration: 600,
+        easing: Easing.ease,
+      });
+    }, [token])
+  );
+
   const CustomInput = (props: any) => (
     <TextInput
       {...props}
@@ -263,7 +296,10 @@ export default function AddSpent() {
       <ScrollView>
         <BreadCrumb route="Nova transação" />
 
-        <View style={styles.container}>
+        <Animated.View
+          key={animationKey}
+          style={[styles.container, animatedStyle]}
+        >
           <PageTitle title="Adicionar Nova Despesa" />
           {/* form */}
           <View style={styles.formContainer}>
@@ -403,7 +439,7 @@ export default function AddSpent() {
               </Button>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );

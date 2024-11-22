@@ -27,8 +27,17 @@ import DeleteExpense from "./components/DeleteExpense";
 import NotFoundItems from "../../components/NotFondItems";
 import Toast from "react-native-toast-message";
 import PageTitle from "@/ui/components/PageTitle";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 export default function ExpensesComponent() {
+  const opacity = useSharedValue(0); // Para fade-in
+  const scale = useSharedValue(0.95); // Para efeito de crescimento
+  const [animationKey, setAnimationKey] = useState(0);
   const [month, setMonth] = useState<string>();
   const [token, setToken] = useState<string>("");
   const [username, setUsername] = useState<string>("");
@@ -131,11 +140,31 @@ export default function ExpensesComponent() {
     }, [])
   );
 
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ scale: scale.value }],
+    };
+  });
+
   useFocusEffect(
     useCallback(() => {
       if (token && token.length) {
         setMonthToCurrent();
         getExpenses({ month: currentMonth });
+        // Reinicia a animação
+        setAnimationKey((prevKey) => prevKey + 1);
+        opacity.value = 0; // Reinicia a opacidade
+        scale.value = 0.95; // Reinicia a escala
+
+        opacity.value = withTiming(1, {
+          duration: 600,
+          easing: Easing.ease,
+        });
+        scale.value = withTiming(1, {
+          duration: 600,
+          easing: Easing.ease,
+        });
       }
     }, [token])
   );
@@ -157,7 +186,10 @@ export default function ExpensesComponent() {
 
   return (
     <ScrollView>
-      <View style={styles.container}>
+      <Animated.View
+        key={animationKey}
+        style={[styles.container, animatedStyle]}
+      >
         <PageTitle title="Meus Gastos e Despesas" />
 
         <View style={styles.referenceMonthContainer}>
@@ -281,7 +313,7 @@ export default function ExpensesComponent() {
             />
           </View>
         )}
-      </View>
+      </Animated.View>
     </ScrollView>
   );
 }
