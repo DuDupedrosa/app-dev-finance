@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Text } from "react-native-paper";
-import { useEffect, useState } from "react";
+import { Button } from "react-native-paper";
+import { useCallback, useState } from "react";
 import Animated, {
   Easing,
   useSharedValue,
@@ -9,13 +9,11 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { customTheme } from "@/theme/theme";
-import { useLocalSearchParams } from "expo-router";
-import { DefaultRouterParams } from "@/types/defaultRouterParams";
+import { useFocusEffect } from "expo-router";
 import { http } from "@/api/http";
 import { User } from "@/types/user";
 import BasicFormData from "@/ui/tabs/profile/BasicFormData";
 import FormChangePassword from "@/ui/tabs/profile/FormChangePassword";
-import { ActivityIndicator, MD2Colors } from "react-native-paper";
 import PageSpinner from "@/ui/components/PageSpinner";
 import { getUserData } from "@/helpers/methods/asyncStorage";
 import BreadCrumb from "@/ui/components/BreadCrumb";
@@ -56,46 +54,54 @@ export default function ProfileScreen() {
   const [token, setToken] = useState<string>("");
   const [username, setUsername] = useState<string>("");
 
-  useEffect(() => {
-    translateX.value = withTiming(0, {
-      duration: 500,
-      easing: Easing.out(Easing.exp),
-    });
-
-    const loadUserData = async () => {
-      const user = await getUserData();
-
-      if (user) {
-        if (user.token) setToken(user.token);
-        if (user.username) setUsername(user.username);
-      }
-    };
-    loadUserData();
-  }, []);
-
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: translateX.value }],
     };
   });
 
-  useEffect(() => {
-    async function getUserData() {
-      setLoading(true);
-      try {
-        const { data } = await http.get("user", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  useFocusEffect(
+    useCallback(() => {
+      translateX.value = withTiming(0, {
+        duration: 500,
+        easing: Easing.out(Easing.exp),
+      });
 
-        setUserData(data.content);
-      } catch (err) {}
-      setLoading(false);
-    }
+      const loadUserData = async () => {
+        const user = await getUserData();
 
-    if (token) {
-      getUserData();
-    }
-  }, [token]);
+        if (user) {
+          if (user.token) setToken(user.token);
+          if (user.username) setUsername(user.username);
+        }
+      };
+      loadUserData();
+
+      return () => {
+        // Limpeza, se necessário
+      };
+    }, [])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      const getUserData = async () => {
+        setLoading(true);
+        try {
+          const { data } = await http.get("user", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          setUserData(data.content);
+        } catch (err) {}
+        setLoading(false);
+      };
+
+      if (token && token.length) {
+        getUserData();
+      }
+    }, [token])
+  );
 
   return (
     <SafeAreaView

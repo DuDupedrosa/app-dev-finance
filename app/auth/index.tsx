@@ -64,7 +64,7 @@ export default function LoginPage() {
       const { data } = await http.post(`user/signin`, payload);
       const { token, user } = data.content;
       router.push({
-        pathname: "/(tabs)/profile",
+        pathname: "/(tabs)",
       });
       await AsyncStorage.multiSet([
         ["token", token],

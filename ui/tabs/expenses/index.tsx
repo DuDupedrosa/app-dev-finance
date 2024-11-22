@@ -1,5 +1,5 @@
 import { customTheme } from "@/theme/theme";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -22,7 +22,7 @@ import { formatDateHelper } from "@/helpers/methods/formatDate";
 import { formatCurrencyBRL } from "@/helpers/methods/formatCurrency";
 import GetExpenseIcon from "../../components/GetExpenseIcon";
 import { getMonth } from "date-fns";
-import { useNavigation, router } from "expo-router";
+import { useNavigation, router, useFocusEffect } from "expo-router";
 import DeleteExpense from "./components/DeleteExpense";
 import NotFoundItems from "../../components/NotFondItems";
 import Toast from "react-native-toast-message";
@@ -112,25 +112,33 @@ export default function ExpensesComponent() {
     setDeleteExpenseLoading(false);
   }
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      const user = await getUserData();
+  useFocusEffect(
+    useCallback(() => {
+      const loadUserData = async () => {
+        const user = await getUserData();
 
-      if (user) {
-        if (user.token) setToken(user.token);
-        if (user.username) setUsername(user.username);
+        if (user) {
+          if (user.token) setToken(user.token);
+          if (user.username) setUsername(user.username);
+        }
+      };
+      loadUserData();
+      setCurrentMonth(getMonth(new Date()));
+
+      return () => {
+        // Limpeza, se necessário
+      };
+    }, [])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (token && token.length) {
+        setMonthToCurrent();
+        getExpenses({ month: currentMonth });
       }
-    };
-    loadUserData();
-    setCurrentMonth(getMonth(new Date()));
-  }, []);
-
-  useEffect(() => {
-    if (token && token.length) {
-      setMonthToCurrent();
-      getExpenses({ month: currentMonth });
-    }
-  }, [token]);
+    }, [token])
+  );
 
   useEffect(() => {
     if (!token || token.length <= 0) return;

@@ -1,14 +1,8 @@
 import { customTheme } from "@/theme/theme";
-import {
-  StyleSheet,
-  View,
-  Dimensions,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { StyleSheet, View, TouchableOpacity, ScrollView } from "react-native";
 import { ActivityIndicator, Text } from "react-native-paper";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { format, getMonth } from "date-fns";
 import { getUserData } from "@/helpers/methods/asyncStorage";
 import { ExpenseDataType } from "@/types/expense";
@@ -17,7 +11,7 @@ import { formatDateHelper } from "@/helpers/methods/formatDate";
 import { formatCurrencyBRL } from "@/helpers/methods/formatCurrency";
 import getCategoryStyles from "@/helpers/methods/getCategoryStyles";
 import GetExpenseIcon from "@/ui/components/GetExpenseIcon";
-import { useNavigation, router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import NotFoundItems from "@/ui/components/NotFondItems";
 import { ptBR } from "date-fns/locale";
 
@@ -55,25 +49,34 @@ export default function HomeComponent() {
     setLoading(false);
   }
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      const user = await getUserData();
+  useFocusEffect(
+    useCallback(() => {
+      const loadUserData = async () => {
+        const user = await getUserData();
 
-      if (user) {
-        if (user.token) setToken(user.token);
-        if (user.username) setUsername(user.username);
+        if (user) {
+          if (user.token) setToken(user.token);
+          if (user.username) setUsername(user.username);
+        }
+        setCurrentMonth(getMonth(new Date()));
+      };
+
+      loadUserData();
+
+      return () => {
+        // Limpeza, se necessário
+      };
+    }, [])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (token && token.length) {
+        getExpenses();
+        getExpensesTotal();
       }
-    };
-    loadUserData();
-    setCurrentMonth(getMonth(new Date()));
-  }, []);
-
-  useEffect(() => {
-    if (token && token.length) {
-      getExpenses();
-      getExpensesTotal();
-    }
-  }, [token]);
+    }, [token])
+  );
 
   return (
     <View style={styles.container}>
